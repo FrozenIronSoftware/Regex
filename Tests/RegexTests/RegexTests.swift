@@ -18,14 +18,16 @@ import XCTest
 import Regex
 
 class RegexTests: XCTestCase {
-    static let pattern:String = "(.+?)([1,2,3]*)(.*)"
-    let regex:RegexProtocol = try! Regex(pattern:RegexTests.pattern, groupNames:"letter", "digits", "rest")
-    let source = "l321321alala"
+    static let pattern:String = "(.+?)([1,2,3]*)(.)(.*)"
+    let regex:RegexProtocol = try! Regex(pattern:RegexTests.pattern, groupNames:"letter", "digits",
+                                         "smiley_emoji", "rest")
+    let source = "l321321🙂alala"
     let letter = "l"
     let digits = "321321"
+    let smileyEmoji = "🙂"
     let rest = "alala"
-    let replaceAllTemplate = "$1-$2-$3"
-    let replaceAllResult = "l-321321-alala"
+    let replaceAllTemplate = "$1-$2-$3-$4"
+    let replaceAllResult = "l-321321-🙂-alala"
     
     let names = "Harry Trump ;Fred Barney; Helen Rigby ; Bill Abel ;Chris Hand"
     let namesSplitPattern = "\\s*;\\s*";
@@ -78,6 +80,10 @@ class RegexTests: XCTestCase {
         _test(group: "digits", reference: digits)
     }
     
+    func testEmoji() {
+        _test(group: "smiley_emoji", reference: smileyEmoji)
+    }
+    
     func testRest() {
         _test(group: "rest", reference: rest)
     }
@@ -88,6 +94,7 @@ class RegexTests: XCTestCase {
         if let match = match {
             XCTAssertEqual(letter, match.group(named: "letter"))
             XCTAssertEqual(digits, match.group(named: "digits"))
+            XCTAssertEqual(smileyEmoji, match.group(named: "smiley_emoji"))
             XCTAssertEqual(rest, match.group(named: "rest"))
             
             XCTAssertEqual(source, match.matched)
@@ -96,7 +103,8 @@ class RegexTests: XCTestCase {
             
             XCTAssertEqual(letter, subgroups[0])
             XCTAssertEqual(digits, subgroups[1])
-            XCTAssertEqual(rest, subgroups[2])
+            XCTAssertEqual(smileyEmoji, subgroups[2])
+            XCTAssertEqual(rest, subgroups[3])
         } else {
             XCTFail("Bad test, can not reach this path")
         }
@@ -179,14 +187,16 @@ class RegexTests: XCTestCase {
             let groups = match.groups
             XCTAssertEqual(letter, groups["letter"])
             XCTAssertEqual(digits, groups["digits"])
+            XCTAssertEqual(smileyEmoji, groups["smiley_emoji"])
             XCTAssertEqual(rest, groups["rest"])
             XCTAssertNil(groups["unexisted"])
             
             XCTAssertEqual(source, groups[0])
             XCTAssertEqual(letter, groups[1])
             XCTAssertEqual(digits, groups[2])
-            XCTAssertEqual(rest, groups[3])
-            XCTAssertNil(groups[4])
+            XCTAssertEqual(smileyEmoji, groups[3])
+            XCTAssertEqual(rest, groups[4])
+            XCTAssertNil(groups[5])
         } else {
             XCTFail("Bad test, can not reach this path")
         }
@@ -202,6 +212,7 @@ extension RegexTests {
 			("testSimple", testSimple),
 			("testLetter", testLetter),
 			("testDigits", testDigits),
+			("testEmoji", testEmoji),
 			("testRest", testRest),
 			("testFirstMatch", testFirstMatch),
 			("testReplaceAll", testReplaceAll),
